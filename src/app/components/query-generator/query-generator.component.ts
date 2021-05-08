@@ -69,6 +69,19 @@ export class QueryGeneratorComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  onChangeSyntax() {
+    this.whereFormControl.reset();
+    this.queryForm.reset();
+    this.joinForm.reset();
+    this.insertForm.reset();
+    this.updateForm.reset();
+    this.deleteForm.reset();
+    this.queryWheres = [];
+    this.querySelects = [];
+    this.queryJoins = [];
+    this.optionalSections = {};
+  }
+
   onClickAddStatement() {
     if (this.queryForm.invalid) {
       this.queryForm.markAllAsTouched();
@@ -124,8 +137,11 @@ export class QueryGeneratorComponent implements OnInit {
         break;
       }
     }
-    this.generatedQuery.setValue(query);
-    this.optionalSections.ResultQuery = true;
+
+    if (query) {
+      this.generatedQuery.setValue(query);
+      this.optionalSections.ResultQuery = true;
+    }
   }
 
   onClickAddJoin() {
@@ -198,6 +214,8 @@ export class QueryGeneratorComponent implements OnInit {
   }
 
   get generateSelectQuery() {
+    if (this.querySelects.length === 0) return '';
+
     let tablesInJoin: string[] = [];
     let query = `${this.sentenceFormControl.value}\n`;
 
@@ -211,7 +229,9 @@ export class QueryGeneratorComponent implements OnInit {
 
     this.queryJoins.forEach((join, index) => {
       if (!tablesInJoin.some((x) => x === join.value[`table1-${index}`])) {
+        if (index > 0) query += ', ';
         query += `${join.value[`table1-${index}`]}`;
+
         tablesInJoin.push(join.value[`table1-${index}`]);
       }
 
@@ -228,6 +248,8 @@ export class QueryGeneratorComponent implements OnInit {
 
     this.querySelects.forEach((statement, index) => {
       if (!tablesInJoin.some((x) => x === statement.value[`table-${index}`])) {
+        if (index > 0) query += ', ';
+
         query += `${statement.value[`table-${index}`]}`;
       }
     });

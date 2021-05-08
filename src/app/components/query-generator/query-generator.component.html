@@ -14,6 +14,7 @@
               >
               <div class="col-8 col-sm-3">
                 <select
+                (change)="onChangeSyntax()"
                   class="form-control form-control-sm"
                   [ngClass]="{
                     'is-invalid':
@@ -592,14 +593,20 @@
                     </div>
                   </form>
                 </div>
-                <div class="col-12 my-2 text-center">
-                  <button
-                    class="btn btn-lg btn-success"
-                    (click)="onClickGenerateQuery()"
-                  >
-                    GENERATE QUERY
-                  </button>
-                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-12 my-2 text-center">
+                <button
+                  class="btn btn-lg btn-success"
+                  (click)="onClickGenerateQuery()"
+                >
+                  GENERATE QUERY
+                </button>
               </div>
             </div>
           </div>
