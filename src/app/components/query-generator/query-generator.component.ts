@@ -15,20 +15,23 @@ export class QueryGeneratorComponent implements OnInit {
   sentences: string[];
   joinTypes: string[];
   sentenceFormControl: FormControl;
+  whereFormControl: FormControl;
   generatedQuery: FormControl;
   queryForm: FormGroup;
   joinForm: FormGroup;
   querySelects: FormGroup[];
   queryJoins: FormGroup[];
+  queryWheres: FormControl[];
   optionalSections: any;
 
   constructor(private formBuilder: FormBuilder) {
-    this.sentences = ['Select', 'Insert', 'Update', 'Delete'];
-    this.joinTypes = ['Inner Join', 'Left Join', 'Right Join', 'Full Join'];
+    this.sentences = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
+    this.joinTypes = ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN'];
     this.sentenceFormControl = new FormControl(
       this.sentences[0],
       Validators.required
     );
+    this.whereFormControl = new FormControl('', Validators.required);
     this.generatedQuery = new FormControl('');
     this.queryForm = this.formBuilder.group({
       columns: ['', Validators.required],
@@ -41,6 +44,7 @@ export class QueryGeneratorComponent implements OnInit {
       table2: ['', Validators.required],
       onColumnTable2: ['', Validators.required],
     });
+    this.queryWheres = [];
     this.querySelects = [];
     this.queryJoins = [];
     this.optionalSections = {};
@@ -74,36 +78,61 @@ export class QueryGeneratorComponent implements OnInit {
     this.querySelects.splice(statementIndex, 1);
   }
 
-  onClickAddJoinClause() {
+  onClickJoinClause() {
     this.optionalSections.Join = !this.optionalSections.Join;
   }
 
+  onClickWhereClause() {
+    this.optionalSections.Where = !this.optionalSections.Where;
+  }
+
   onClickGenerateQuery() {
-    let query = '';
-    query += this.sentenceFormControl.value;
+    let tablesInJoin: string[] = [];
+    let query = `${this.sentenceFormControl.value}\n`;
 
     this.querySelects.forEach((statement, index) => {
-      if (
-        this.querySelects.length >= 1 &&
-        index < this.querySelects.length - 1
-      ) {
-        query += `${statement.value['columns-' + index]}, `;
-      } else {
-        query += `${statement.value['columns-' + index]}\n`;
+      query += `${statement.value[`columns-${index}`]}`;
+
+      if (index < this.querySelects.length - 1) query += ', ';
+    });
+
+    query += '\nFROM\n';
+
+    this.queryJoins.forEach((join, index) => {
+      if (!tablesInJoin.some((x) => x === join.value[`table1-${index}`])) {
+        query += `${join.value[`table1-${index}`]}`;
+        tablesInJoin.push(join.value[`table1-${index}`]);
+      }
+
+      query += ` ${join.value[`type-${index}`]} ${
+        join.value[`table2-${index}`]
+      } ON ${join.value[`onColumnTable1-${index}`]} = ${
+        join.value[`onColumnTable2-${index}`]
+      }`;
+
+      if (!tablesInJoin.some((x) => x === join.value[`table2-${index}`])) {
+        tablesInJoin.push(join.value[`table2-${index}`]);
       }
     });
 
-    query += 'From ';
     this.querySelects.forEach((statement, index) => {
-      if (
-        this.querySelects.length >= 1 &&
-        index < this.querySelects.length - 1
-      ) {
-        query += `${statement.value['table-' + index]} ,`;
-      } else {
-        query += `${statement.value['table-' + index]};`;
+      if (!tablesInJoin.some((x) => x === statement.value[`table-${index}`])) {
+        query += `${statement.value[`table-${index}`]}`;
       }
     });
+
+    if (this.queryWheres.length > 0) {
+      query += `\nWHERE\n`;
+
+      this.queryWheres.forEach((where, index) => {
+        query += `${where.value}`;
+
+        if (index !== this.queryWheres.length - 1) query += ' ';
+      });
+    }
+
+    this.generatedQuery.setValue(query);
+    this.optionalSections.ResultQuery = true;
   }
 
   onClickAddJoin() {
@@ -140,6 +169,21 @@ export class QueryGeneratorComponent implements OnInit {
     this.joinForm.reset();
   }
 
+  onClickDeleteJoin(index: number) {
+    this.queryJoins.splice(index, 1);
+  }
+
+  onClickAddWhere() {
+    const newWhere = new FormControl(
+      this.whereFormControl.value,
+      Validators.required
+    );
+
+    this.queryWheres.push(newWhere);
+
+    this.whereFormControl.reset();
+  }
+
   get queryFormControls() {
     return this.queryForm.controls;
   }
@@ -161,5 +205,13 @@ export class QueryGeneratorComponent implements OnInit {
     );
   }
 
-  columnsByTable() {}
+  checkIfTableInJoins(tableName: string) {
+    for (let index = 0; index < this.queryJoins.length; index++) {
+      let foo = this.queryJoins[index];
+
+      if (foo.value[`table1-${index}`] === tableName) return index;
+    }
+
+    return -1;
+  }
 }

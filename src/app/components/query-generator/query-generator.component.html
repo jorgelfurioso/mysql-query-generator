@@ -31,7 +31,7 @@
           <div class="container-fluid">
             <div class="row">
               <div class="col-12" [ngSwitch]="sentenceFormControl.value">
-                <div class="row" *ngSwitchCase="'Select'">
+                <div class="row" *ngSwitchCase="'SELECT'">
                   <form
                     class="col-12 my-2"
                     [formGroup]="queryForm"
@@ -134,10 +134,10 @@
                   </div>
                   <div class="col-12 my-2">
                     <div class="row">
-                      <div class="col-2">
+                      <div class="col-12">
                         <button
                           class="btn btn-sm btn-primary mx-2"
-                          (click)="onClickAddJoinClause()"
+                          (click)="onClickJoinClause()"
                         >
                           JOIN CLAUSE
                         </button>
@@ -353,7 +353,7 @@
                             class="col-2 d-flex justify-content-center align-items-center"
                           >
                             <button class="btn btn-sm btn-danger">
-                              ELIMINAR
+                              DELETE
                             </button>
                           </div>
                         </div>
@@ -362,20 +362,85 @@
                   </div>
                   <div class="col-12 my-2">
                     <div class="row">
-                      <div class="col-2">
-                        <button class="btn btn-sm btn-primary mx-2">
+                      <div class="col-12">
+                        <button
+                          class="btn btn-sm btn-primary mx-2"
+                          (click)="onClickWhereClause()"
+                        >
                           WHERE CLAUSE
                         </button>
+                      </div>
+                      <div class="col-12 mt-2" *ngIf="optionalSections.Where">
+                        <div class="row">
+                          <div class="col-4">
+                            <label class="text-truncate"
+                              >Where: <span class="text-danger">*</span></label
+                            >
+                            <input
+                              class="form-control form-control-sm"
+                              [ngClass]="{
+                                'is-invalid':
+                                  whereFormControl.errors &&
+                                  whereFormControl.touched
+                              }"
+                              [formControl]="whereFormControl"
+                            />
+                          </div>
+                          <div
+                            class="col-2 d-flex justify-content-center align-items-center"
+                          >
+                            <button
+                              class="btn btn-sm btn-primary"
+                              (click)="onClickAddWhere()"
+                            >
+                              ADD
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          class="row mt-2"
+                          *ngFor="let where of queryWheres; index as i"
+                        >
+                          <div
+                            class="col-1 d-flex justify-content-center align-items-center"
+                          >
+                            <label>#{{ i + 1 }}</label>
+                          </div>
+                          <div class="col-3">
+                            <label class="text-truncate"
+                              >Where: <span class="text-danger">*</span></label
+                            >
+                            <input
+                              class="form-control form-control-sm"
+                              [ngClass]="{
+                                'is-invalid': where.errors && where.touched
+                              }"
+                              [formControl]="where"
+                            />
+                          </div>
+                          <div
+                            class="col-2 d-flex justify-content-center align-items-center"
+                          >
+                            <button class="btn btn-sm btn-danger">
+                              DELETE
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div *ngSwitchCase="'Insert'">Insert</div>
-                <div *ngSwitchCase="'Update'">Update</div>
-                <div *ngSwitchCase="'Delete'">Delete</div>
+                <div *ngSwitchCase="'INSERT'">Insert</div>
+                <div *ngSwitchCase="'UPDATE'">Update</div>
+                <div *ngSwitchCase="'DELETE'">Delete</div>
                 <div *ngSwitchDefault></div>
                 <div class="col-12 my-2 text-center">
-                  <button class="btn btn-lg btn-success">GENERATE QUERY</button>
+                  <button
+                    class="btn btn-lg btn-success"
+                    (click)="onClickGenerateQuery()"
+                  >
+                    GENERATE QUERY
+                  </button>
                 </div>
               </div>
             </div>
