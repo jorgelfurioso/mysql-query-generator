@@ -1,63 +1,407 @@
-<div class="container-fluid py-2">
+<div class="container-fluid my-2">
   <div class="row">
-    <div class="col-12 my-2">
-      <h6>
-        Fields marked with <span class="text-danger">*</span> are required
-      </h6>
-    </div>
-    <div class="col-12 my-2" [formGroup]="queryForm">
-      <div class="form-group row">
-        <label class="col-4 col-sm-1 col-form-label text-truncate"
-          >Syntax: <span class="text-danger">*</span></label
-        >
-        <div class="col-8 col-sm-3">
-          <select
-            class="form-control form-control-sm"
-            formControlName="sentence"
-            (change)="onSentenceChange()"
-          >
-            <option *ngFor="let sentece of sentences" [value]="sentece">
-              {{ sentece }}
-            </option>
-          </select>
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">Create your query</div>
+        <div class="card-body">
+          <div class="card-title">
+            <p>
+              Fields marked with <span class="text-danger">*</span> are required
+            </p>
+            <div class="row">
+              <label class="col-4 col-sm-1 col-form-label text-truncate"
+                >Syntax: <span class="text-danger">*</span></label
+              >
+              <div class="col-8 col-sm-3">
+                <select
+                  class="form-control form-control-sm"
+                  [ngClass]="{
+                    'is-invalid':
+                      sentenceFormControl.errors && sentenceFormControl.touched
+                  }"
+                  [formControl]="sentenceFormControl"
+                >
+                  <option *ngFor="let sentece of sentences" [value]="sentece">
+                    {{ sentece }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-12" [ngSwitch]="sentenceFormControl.value">
+                <div class="row" *ngSwitchCase="'Select'">
+                  <form
+                    class="col-12 my-2"
+                    [formGroup]="queryForm"
+                    (ngSubmit)="onClickAddStatement()"
+                  >
+                    <div class="row">
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >Columns: <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                queryFormControls.columns.errors &&
+                                queryFormControls.columns.touched
+                            }"
+                            placeholder="Example: Column1, Column2"
+                            formControlName="columns"
+                          />
+                        </div>
+                      </div>
+                      <div
+                        class="col-2 d-flex justify-content-center align-items-center"
+                      >
+                        <label class="text-truncate text-center">FROM</label>
+                      </div>
+                      <div class="col-4">
+                        <label class="text-truncate"
+                          >Table: <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          [ngClass]="{
+                            'is-invalid':
+                              queryFormControls.table.errors &&
+                              queryFormControls.table.touched
+                          }"
+                          placeholder="Example: mytable"
+                          formControlName="table"
+                        />
+                      </div>
+                      <div
+                        class="col-12 col-sm-2 d-flex justify-content-center align-items-center"
+                      >
+                        <button type="submit" class="btn btn-sm btn-primary">
+                          ADD
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  <div class="col-12">
+                    <div
+                      class="row mt-2"
+                      *ngFor="let select of querySelects; index as i"
+                      [formGroup]="select"
+                    >
+                      <div
+                        class="col-1 d-flex justify-content-center align-items-center"
+                      >
+                        #{{ i + 1 }}
+                      </div>
+                      <div class="col-3">
+                        <label class="text-truncate"
+                          >Columns: <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          placeholder="Example: Column1, Column2"
+                          formControlName="columns-{{ i }}"
+                        />
+                      </div>
+                      <div class="col-2"></div>
+                      <div class="col-4">
+                        <label class="text-truncate"
+                          >Table: <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          placeholder="Example: mytable"
+                          formControlName="table-{{ i }}"
+                        />
+                      </div>
+                      <div
+                        class="col-12 col-sm-2 d-flex justify-content-center align-items-center"
+                      >
+                        <button
+                          class="btn btn-sm btn-danger"
+                          (click)="onClickDeleteStatement(i)"
+                        >
+                          DELETE
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 my-2">
+                    <div class="row">
+                      <div class="col-2">
+                        <button
+                          class="btn btn-sm btn-primary mx-2"
+                          (click)="onClickAddJoinClause()"
+                        >
+                          JOIN CLAUSE
+                        </button>
+                      </div>
+                      <div class="col-12" *ngIf="optionalSections.Join">
+                        <div class="row">
+                          <form class="col-12 my-2" [formGroup]="joinForm">
+                            <div class="row">
+                              <div class="col-2">
+                                <div class="form-group">
+                                  <label class="text-truncate"
+                                    >Table 1:
+                                    <span class="text-danger">*</span></label
+                                  >
+                                  <select
+                                    class="form-control form-control-sm"
+                                    formControlName="table1"
+                                    [ngClass]="{
+                                      'is-invalid':
+                                        joinFormControls.table1.errors &&
+                                        joinFormControls.table1.touched
+                                    }"
+                                  >
+                                    <option
+                                      *ngFor="let table of availableTables()"
+                                      [value]="table"
+                                    >
+                                      {{ table }}
+                                    </option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="col-2">
+                                <div class="form-group">
+                                  <label class="text-truncate"
+                                    >Column:
+                                    <span class="text-danger">*</span></label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    formControlName="onColumnTable1"
+                                    [ngClass]="{
+                                      'is-invalid':
+                                        joinFormControls.onColumnTable1
+                                          .errors &&
+                                        joinFormControls.onColumnTable1.touched
+                                    }"
+                                  />
+                                </div>
+                              </div>
+                              <div class="col-2">
+                                <div class="form-group">
+                                  <label class="text-truncate"
+                                    >Join type:
+                                    <span class="text-danger">*</span></label
+                                  >
+                                  <select
+                                    class="form-control form-control-sm"
+                                    formControlName="type"
+                                    [ngClass]="{
+                                      'is-invalid':
+                                        joinFormControls.type.errors &&
+                                        joinFormControls.type.touched
+                                    }"
+                                  >
+                                    <option
+                                      *ngFor="let type of joinTypes"
+                                      [value]="type"
+                                    >
+                                      {{ type }}
+                                    </option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="col-2">
+                                <div class="form-group">
+                                  <label class="text-truncate"
+                                    >Table 2:
+                                    <span class="text-danger">*</span></label
+                                  >
+                                  <select
+                                    class="form-control form-control-sm"
+                                    formControlName="table2"
+                                    [ngClass]="{
+                                      'is-invalid':
+                                        joinFormControls.table2.errors &&
+                                        joinFormControls.table2.touched
+                                    }"
+                                  >
+                                    <option
+                                      *ngFor="let table of availableTables()"
+                                      [value]="table"
+                                    >
+                                      {{ table }}
+                                    </option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="col-2">
+                                <label class="text-truncate"
+                                  >Column:
+                                  <span class="text-danger">*</span></label
+                                >
+                                <input
+                                  type="text"
+                                  class="form-control form-control-sm"
+                                  formControlName="onColumnTable2"
+                                  [ngClass]="{
+                                    'is-invalid':
+                                      joinFormControls.onColumnTable2.errors &&
+                                      joinFormControls.onColumnTable2.touched
+                                  }"
+                                />
+                              </div>
+                              <div
+                                class="col-2 d-flex justify-content-center align-items-center"
+                              >
+                                <button
+                                  class="btn btn-sm btn-primary"
+                                  (click)="onClickAddJoin()"
+                                >
+                                  ADD
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                        <div
+                          class="row"
+                          *ngFor="let join of queryJoins; index as i"
+                          [formGroup]="join"
+                        >
+                          <div
+                            class="col-12 col-sm-1 d-flex justify-content-center align-items-center"
+                          >
+                            <label for="text-center"> #{{ i + 1 }} </label>
+                          </div>
+                          <div class="col-1">
+                            <label class="text-truncate"
+                              >Table 1:
+                              <span class="text-danger">*</span></label
+                            >
+                            <select
+                              class="form-control form-control-sm"
+                              formControlName="table1-{{ i }}"
+                            >
+                              <option
+                                *ngFor="let table of availableTables()"
+                                [value]="table"
+                              >
+                                {{ table }}
+                              </option>
+                            </select>
+                          </div>
+                          <div class="col-2">
+                            <label class="text-truncate"
+                              >Column: <span class="text-danger">*</span></label
+                            >
+                            <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              formControlName="onColumnTable1-{{ i }}"
+                            />
+                          </div>
+                          <div class="col-2">
+                            <div class="form-group">
+                              <label class="text-truncate"
+                                >Join type:
+                                <span class="text-danger">*</span></label
+                              >
+                              <select
+                                class="form-control form-control-sm"
+                                formControlName="type-{{ i }}"
+                              >
+                                <option
+                                  *ngFor="let type of joinTypes"
+                                  [value]="type"
+                                >
+                                  {{ type }}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-2">
+                            <label class="text-truncate"
+                              >Table 2:
+                              <span class="text-danger">*</span></label
+                            >
+                            <select
+                              class="form-control form-control-sm"
+                              formControlName="table2-{{ i }}"
+                            >
+                              <option
+                                *ngFor="let table of availableTables()"
+                                [value]="table"
+                              >
+                                {{ table }}
+                              </option>
+                            </select>
+                          </div>
+                          <div class="col-2">
+                            <label class="text-truncate"
+                              >Column: <span class="text-danger">*</span></label
+                            >
+                            <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              formControlName="onColumnTable2-{{ i }}"
+                            />
+                          </div>
+                          <div
+                            class="col-2 d-flex justify-content-center align-items-center"
+                          >
+                            <button class="btn btn-sm btn-danger">
+                              ELIMINAR
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 my-2">
+                    <div class="row">
+                      <div class="col-2">
+                        <button class="btn btn-sm btn-primary mx-2">
+                          WHERE CLAUSE
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngSwitchCase="'Insert'">Insert</div>
+                <div *ngSwitchCase="'Update'">Update</div>
+                <div *ngSwitchCase="'Delete'">Delete</div>
+                <div *ngSwitchDefault></div>
+                <div class="col-12 my-2 text-center">
+                  <button class="btn btn-lg btn-success">GENERATE QUERY</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="form-group row">
-        <label class="col-4 col-sm-1 col-form-label text-truncate"
-          >Columns 1: <span class="text-danger">*</span></label
-        >
-        <div class="col-8 col-sm-3">
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            placeholder="Example: Column1, Column2"
-          />
-        </div>
-        <label class="col-12 col-sm-1 col-form-label text-truncate text-center"
-          >FROM</label
-        >
-        <label class="col-4 col-sm-1 col-form-label text-truncate"
-          >Table 1: <span class="text-danger">*</span></label
-        >
-        <div class="col-8 col-sm-3">
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            placeholder="Example: mytable"
-          />
-        </div>
-        <div class="col-12 col-sm-3">
-          <button class="btn btn-sm btn-primary">ADD</button>
+    </div>
+    <div class="col-12 my-2" *ngIf="optionalSections.ResultQuery">
+      <div class="card">
+        <div class="card-header">Result query</div>
+        <div class="card-body">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-12">
+                <div class="form-group">
+                  <textarea
+                    rows="10"
+                    class="form-control form-control-sm"
+                    [formControl]="generatedQuery"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="col-12 my-2">
-      <button class="btn btn-sm btn-primary mx-2">ADD JOIN</button>
-      <button class="btn btn-sm btn-primary mx-2">ADD WHERE</button>
-    </div>
-    <div class="col-12 my-2 text-center">
-      <button class="btn btn-lg btn-success">GENERATE QUERY</button>
     </div>
   </div>
 </div>
