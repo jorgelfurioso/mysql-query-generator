@@ -21,13 +21,14 @@ export class QueryGeneratorComponent implements OnInit {
   joinForm: FormGroup;
   insertForm: FormGroup;
   updateForm: FormGroup;
+  deleteForm: FormGroup;
   querySelects: FormGroup[];
   queryJoins: FormGroup[];
   queryWheres: FormControl[];
   optionalSections: any;
 
   constructor(private formBuilder: FormBuilder) {
-    this.sentences = ['SELECT', 'INSERT INTO', 'UPDATE', 'DELETE'];
+    this.sentences = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
     this.joinTypes = ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN'];
     this.sentenceFormControl = new FormControl(
       this.sentences[0],
@@ -55,6 +56,10 @@ export class QueryGeneratorComponent implements OnInit {
       table: ['', Validators.required],
       columns: ['', Validators.required],
       values: ['', Validators.required],
+    });
+    this.deleteForm = formBuilder.group({
+      table: ['', Validators.required],
+      where: ['', Validators.required],
     });
     this.queryWheres = [];
     this.querySelects = [];
@@ -106,7 +111,7 @@ export class QueryGeneratorComponent implements OnInit {
         query = this.generateSelectQuery;
         break;
       }
-      case 'INSERT INTO': {
+      case 'INSERT': {
         query = this.generateInsertQuery;
         break;
       }
@@ -115,6 +120,7 @@ export class QueryGeneratorComponent implements OnInit {
         break;
       }
       case 'DELETE': {
+        query = this.generateDeleteQuery;
         break;
       }
     }
@@ -187,6 +193,10 @@ export class QueryGeneratorComponent implements OnInit {
     return this.updateForm.controls;
   }
 
+  get deleteFormControls() {
+    return this.deleteForm.controls;
+  }
+
   get generateSelectQuery() {
     let tablesInJoin: string[] = [];
     let query = `${this.sentenceFormControl.value}\n`;
@@ -238,7 +248,7 @@ export class QueryGeneratorComponent implements OnInit {
   get generateInsertQuery() {
     if (this.insertForm.invalid) return '';
 
-    let query = `${this.sentenceFormControl.value} ${this.insertFormControls.table.value}`;
+    let query = `${this.sentenceFormControl.value} INTO ${this.insertFormControls.table.value}`;
     query += `(${this.insertFormControls.columns.value})`;
     query += `\nVALUES (${this.insertFormControls.columns.value})`;
 
@@ -257,6 +267,15 @@ export class QueryGeneratorComponent implements OnInit {
 
       if (index < columns.length - 1) query += ',\n';
     }
+
+    return query;
+  }
+
+  get generateDeleteQuery() {
+    if (this.deleteForm.invalid) return '';
+
+    let query = `${this.sentenceFormControl.value} FROM ${this.deleteFormControls.table.value}\n`;
+    query += `WHERE ${this.deleteFormControls.where.value}`;
 
     return query;
   }

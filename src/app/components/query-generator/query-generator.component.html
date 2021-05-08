@@ -430,7 +430,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="row" *ngSwitchCase="'INSERT INTO'">
+                <div class="row" *ngSwitchCase="'INSERT'">
                   <form class="col-12" [formGroup]="insertForm">
                     <div class="row">
                       <div class="col-4">
@@ -491,7 +491,7 @@
                     </div>
                   </form>
                 </div>
-                <div *ngSwitchCase="'UPDATE'">
+                <div class="row" *ngSwitchCase="'UPDATE'">
                   <form class="col-12" [formGroup]="updateForm">
                     <div class="row">
                       <div class="col-4">
@@ -552,8 +552,46 @@
                     </div>
                   </form>
                 </div>
-                <div *ngSwitchCase="'DELETE'">Delete</div>
-                <div *ngSwitchDefault></div>
+                <div class="row" *ngSwitchCase="'DELETE'">
+                  <form class="col-12" [formGroup]="deleteForm">
+                    <div class="row">
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >TABLE <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                deleteFormControls.table.errors &&
+                                deleteFormControls.table.touched
+                            }"
+                            formControlName="table"
+                            placeholder="Example: mytable"
+                          />
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <label class="text-truncate"
+                          >WHERE <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          [ngClass]="{
+                            'is-invalid':
+                              deleteFormControls.where.errors &&
+                              deleteFormControls.where.touched
+                          }"
+                          formControlName="where"
+                          placeholder="Example: column2 = 10 AND column2 > 5"
+                        />
+                      </div>
+                    </div>
+                  </form>
+                </div>
                 <div class="col-12 my-2 text-center">
                   <button
                     class="btn btn-lg btn-success"
