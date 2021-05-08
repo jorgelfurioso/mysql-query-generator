@@ -430,8 +430,128 @@
                     </div>
                   </div>
                 </div>
-                <div *ngSwitchCase="'INSERT'">Insert</div>
-                <div *ngSwitchCase="'UPDATE'">Update</div>
+                <div class="row" *ngSwitchCase="'INSERT INTO'">
+                  <form class="col-12" [formGroup]="insertForm">
+                    <div class="row">
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >Into table
+                            <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                insertFormControls.table.errors &&
+                                insertFormControls.table.touched
+                            }"
+                            placeholder="Example: mytable"
+                            formControlName="table"
+                          />
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >Colums <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                insertFormControls.columns.errors &&
+                                insertFormControls.columns.touched
+                            }"
+                            placeholder="Example: column1, column2"
+                            formControlName="columns"
+                          />
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >Values <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                insertFormControls.values.errors &&
+                                insertFormControls.values.touched
+                            }"
+                            placeholder="Example: value1, value2"
+                            formControlName="values"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div *ngSwitchCase="'UPDATE'">
+                  <form class="col-12" [formGroup]="updateForm">
+                    <div class="row">
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >Into table
+                            <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                updateFormControls.table.errors &&
+                                updateFormControls.table.touched
+                            }"
+                            placeholder="Example: mytable"
+                            formControlName="table"
+                          />
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >Colums <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                updateFormControls.columns.errors &&
+                                updateFormControls.columns.touched
+                            }"
+                            placeholder="Example: column1, column2"
+                            formControlName="columns"
+                          />
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label class="text-truncate"
+                            >Values <span class="text-danger">*</span></label
+                          >
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            [ngClass]="{
+                              'is-invalid':
+                                updateFormControls.values.errors &&
+                                updateFormControls.values.touched
+                            }"
+                            placeholder="Example: value1, value2"
+                            formControlName="values"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
                 <div *ngSwitchCase="'DELETE'">Delete</div>
                 <div *ngSwitchDefault></div>
                 <div class="col-12 my-2 text-center">

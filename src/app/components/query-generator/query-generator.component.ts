@@ -19,13 +19,15 @@ export class QueryGeneratorComponent implements OnInit {
   generatedQuery: FormControl;
   queryForm: FormGroup;
   joinForm: FormGroup;
+  insertForm: FormGroup;
+  updateForm: FormGroup;
   querySelects: FormGroup[];
   queryJoins: FormGroup[];
   queryWheres: FormControl[];
   optionalSections: any;
 
   constructor(private formBuilder: FormBuilder) {
-    this.sentences = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
+    this.sentences = ['SELECT', 'INSERT INTO', 'UPDATE', 'DELETE'];
     this.joinTypes = ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN'];
     this.sentenceFormControl = new FormControl(
       this.sentences[0],
@@ -37,12 +39,22 @@ export class QueryGeneratorComponent implements OnInit {
       columns: ['', Validators.required],
       table: ['', Validators.required],
     });
-    this.joinForm = formBuilder.group({
+    this.joinForm = this.formBuilder.group({
       type: [this.joinTypes[0], Validators.required],
       table1: ['', Validators.required],
       onColumnTable1: ['', Validators.required],
       table2: ['', Validators.required],
       onColumnTable2: ['', Validators.required],
+    });
+    this.insertForm = this.formBuilder.group({
+      table: ['', Validators.required],
+      columns: ['', Validators.required],
+      values: ['', Validators.required],
+    });
+    this.updateForm = this.formBuilder.group({
+      table: ['', Validators.required],
+      columns: ['', Validators.required],
+      values: ['', Validators.required],
     });
     this.queryWheres = [];
     this.querySelects = [];
@@ -87,50 +99,25 @@ export class QueryGeneratorComponent implements OnInit {
   }
 
   onClickGenerateQuery() {
-    let tablesInJoin: string[] = [];
-    let query = `${this.sentenceFormControl.value}\n`;
+    let query = '';
 
-    this.querySelects.forEach((statement, index) => {
-      query += `${statement.value[`columns-${index}`]}`;
-
-      if (index < this.querySelects.length - 1) query += ', ';
-    });
-
-    query += '\nFROM\n';
-
-    this.queryJoins.forEach((join, index) => {
-      if (!tablesInJoin.some((x) => x === join.value[`table1-${index}`])) {
-        query += `${join.value[`table1-${index}`]}`;
-        tablesInJoin.push(join.value[`table1-${index}`]);
+    switch (this.sentenceFormControl.value) {
+      case 'SELECT': {
+        query = this.generateSelectQuery;
+        break;
       }
-
-      query += ` ${join.value[`type-${index}`]} ${
-        join.value[`table2-${index}`]
-      } ON ${join.value[`onColumnTable1-${index}`]} = ${
-        join.value[`onColumnTable2-${index}`]
-      }`;
-
-      if (!tablesInJoin.some((x) => x === join.value[`table2-${index}`])) {
-        tablesInJoin.push(join.value[`table2-${index}`]);
+      case 'INSERT INTO': {
+        query = this.generateInsertQuery;
+        break;
       }
-    });
-
-    this.querySelects.forEach((statement, index) => {
-      if (!tablesInJoin.some((x) => x === statement.value[`table-${index}`])) {
-        query += `${statement.value[`table-${index}`]}`;
+      case 'UPDATE': {
+        query = this.generateUpdateQuery;
+        break;
       }
-    });
-
-    if (this.queryWheres.length > 0) {
-      query += `\nWHERE\n`;
-
-      this.queryWheres.forEach((where, index) => {
-        query += `${where.value}`;
-
-        if (index !== this.queryWheres.length - 1) query += ' ';
-      });
+      case 'DELETE': {
+        break;
+      }
     }
-
     this.generatedQuery.setValue(query);
     this.optionalSections.ResultQuery = true;
   }
@@ -192,6 +179,88 @@ export class QueryGeneratorComponent implements OnInit {
     return this.joinForm.controls;
   }
 
+  get insertFormControls() {
+    return this.insertForm.controls;
+  }
+
+  get updateFormControls() {
+    return this.updateForm.controls;
+  }
+
+  get generateSelectQuery() {
+    let tablesInJoin: string[] = [];
+    let query = `${this.sentenceFormControl.value}\n`;
+
+    this.querySelects.forEach((statement, index) => {
+      query += `${statement.value[`columns-${index}`]}`;
+
+      if (index < this.querySelects.length - 1) query += ', ';
+    });
+
+    query += '\nFROM\n';
+
+    this.queryJoins.forEach((join, index) => {
+      if (!tablesInJoin.some((x) => x === join.value[`table1-${index}`])) {
+        query += `${join.value[`table1-${index}`]}`;
+        tablesInJoin.push(join.value[`table1-${index}`]);
+      }
+
+      query += ` ${join.value[`type-${index}`]} ${
+        join.value[`table2-${index}`]
+      } ON ${join.value[`onColumnTable1-${index}`]} = ${
+        join.value[`onColumnTable2-${index}`]
+      }`;
+
+      if (!tablesInJoin.some((x) => x === join.value[`table2-${index}`])) {
+        tablesInJoin.push(join.value[`table2-${index}`]);
+      }
+    });
+
+    this.querySelects.forEach((statement, index) => {
+      if (!tablesInJoin.some((x) => x === statement.value[`table-${index}`])) {
+        query += `${statement.value[`table-${index}`]}`;
+      }
+    });
+
+    if (this.queryWheres.length > 0) {
+      query += `\nWHERE\n`;
+
+      this.queryWheres.forEach((where, index) => {
+        query += `${where.value}`;
+
+        if (index !== this.queryWheres.length - 1) query += ' ';
+      });
+    }
+
+    return query;
+  }
+
+  get generateInsertQuery() {
+    if (this.insertForm.invalid) return '';
+
+    let query = `${this.sentenceFormControl.value} ${this.insertFormControls.table.value}`;
+    query += `(${this.insertFormControls.columns.value})`;
+    query += `\nVALUES (${this.insertFormControls.columns.value})`;
+
+    return query;
+  }
+
+  get generateUpdateQuery() {
+    if (this.updateForm.invalid) return '';
+
+    let query = `${this.sentenceFormControl.value} ${this.updateFormControls.table.value} SET\n`;
+    const columns = this.updateFormControls.columns.value.split(',');
+    const values = this.updateFormControls.values.value.split(',');
+
+    for (let index = 0; index < columns.length; index++) {
+      query += `${columns[index]} = ${values[index]}`;
+
+      if (index < columns.length - 1) query += ',\n';
+    }
+
+    return query;
+  }
+
   resetQueryForm() {
     this.queryForm.reset({
       columns: '',
@@ -203,15 +272,5 @@ export class QueryGeneratorComponent implements OnInit {
     return this.querySelects.map(
       (formGroup, index) => formGroup.controls[`table-${index}`].value
     );
-  }
-
-  checkIfTableInJoins(tableName: string) {
-    for (let index = 0; index < this.queryJoins.length; index++) {
-      let foo = this.queryJoins[index];
-
-      if (foo.value[`table1-${index}`] === tableName) return index;
-    }
-
-    return -1;
   }
 }
