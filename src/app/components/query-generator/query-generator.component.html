@@ -14,7 +14,7 @@
               >
               <div class="col-8 col-sm-3">
                 <select
-                (change)="onChangeSyntax()"
+                  (change)="onChangeSyntax()"
                   class="form-control form-control-sm"
                   [ngClass]="{
                     'is-invalid':
@@ -353,7 +353,10 @@
                           <div
                             class="col-2 d-flex justify-content-center align-items-center"
                           >
-                            <button class="btn btn-sm btn-danger">
+                            <button
+                              class="btn btn-sm btn-danger"
+                              (click)="onClickDeleteJoin(i)"
+                            >
                               DELETE
                             </button>
                           </div>
@@ -422,7 +425,7 @@
                           <div
                             class="col-2 d-flex justify-content-center align-items-center"
                           >
-                            <button class="btn btn-sm btn-danger">
+                            <button class="btn btn-sm btn-danger" (click)="onClickDeleteWhere(i)">
                               DELETE
                             </button>
                           </div>

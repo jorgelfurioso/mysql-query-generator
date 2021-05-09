@@ -193,6 +193,10 @@ export class QueryGeneratorComponent implements OnInit {
     this.whereFormControl.reset();
   }
 
+  onClickDeleteWhere(index: number) {
+    this.queryWheres.splice(index, 1);
+  }
+
   get queryFormControls() {
     return this.queryForm.controls;
   }
@@ -272,7 +276,7 @@ export class QueryGeneratorComponent implements OnInit {
 
     let query = `${this.sentenceFormControl.value} INTO ${this.insertFormControls.table.value}`;
     query += `(${this.insertFormControls.columns.value})`;
-    query += `\nVALUES (${this.insertFormControls.columns.value})`;
+    query += `\nVALUES (${this.insertFormControls.values.value})`;
 
     return query;
   }
